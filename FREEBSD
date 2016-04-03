@@ -1,0 +1,32 @@
+Antal Novak <afn@weevil.net> sent these instructions for imwheel on FreeBSD, 
+plus a few patches...ENJOY! (slightly edited for content and to fit your screen)
+
+I currenly have FreeBSD-3.0 (although this should work with 2.2.6, or even 
+earlier) and a Microsoft IntelliMouse PS/2.
+I did the following to get it to work:
+
+1) To run moused, use the -t sysmouse (NOT PS/2!!!) argument for a ps/2
+   mouse, or -t intellimouse for the serial version (note, i've never tried
+   the serial version, so i'm not *positive* it will work... I'd like some
+   feedback on this if possible)
+
+2) Run imwheel using method #1 as described in the imwheel README.
+   However, your XF86Config *must* be set up as follows (since there is no
+   FreeBSD XFree86 support for IMPS/2 because it can't preinitialize the ps/2
+   port):
+
+Section "Pointer"
+   Protocol        "IntelliMouse"
+   Device          "/dev/sysmouse"
+   ZAxisMapping    4 5
+EndSection
+
+You can add other options if you want; however, it is important that you use 
+the IntelliMouse protocol and read from /dev/sysmouse (this is the passthrough 
+device for moused).  Basically, the way moused works is that you can use *ANY* 
+protocol for reading /dev/sysmouse.  Therefore, since we can't use IMPS/2, we 
+simply use IntelliMouse, so X thinks it's a serial IntelliMouse, and everything 
+is passed through!
+
+Oh yeah, one final note, gpm is NOT needed (nor will it even compile) on
+FreeBSD.

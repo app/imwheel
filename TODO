@@ -1,0 +1,21 @@
+[High]
+update docs for pre-release stuff
+
+[Low]
+create a nice printable readme for printing (LaTeX or DocBook?, or texinfo!)
+use @sysconfdir@ for imwheelrc installation and read location
+rewrite configure.in (it was my first one after all!)
+add gesture support
+
+[Never :( ]
+allow for a modifier key and mouse motion to emulate wheel
+
+(done) Allow for specific Excluded X mouse buttons
+(done) allow sending of mouse buttons, besides keys...
+(done) move global imwheelrc to /etc/X11
+(done) add keyup support (mid output keys, like L|-L|u|-u etc..)
+
+(?)
+convert NEWS file to the standard NEWS file format
+convert ChangeLog file to the standard ChangeLog file format
+convert AUTHORS file to the standard AUTHORS file format

@@ -1,0 +1,27 @@
+#! /bin/sh
+
+INFO='
+	man DefaultRootWindow
+	man XAllowEvents
+	man XGrabButton
+	man XSendEvent
+	man XQueryTree
+	man XQueryPointer
+	man XGetInputFocus
+	man XGetDeviceFocus
+	man XOpenDevice
+	man XSendExtensionEvent
+	less /usr/X11R6/include/X11/X.h
+	less /usr/X11R6/include/X11/keysymdef.h
+	less /usr/X11R6/include/X11/extensions/XTest.h
+	less /usr/X11R6/include/X11/extensions/XInput.h
+'
+
+if [ $# -gt 0 ]
+then 
+	`cat << . | grep -i "$1" | awk 'NR==1'
+$INFO
+.`
+else
+	echo -n "Info available:$INFO"
+fi

@@ -1,0 +1,27 @@
+							Logitech Mouseman Wheel
+
+	This mouse wheel clicks on rolling, but the clicks are NOT the actual 
+move, the mouse is using the wheel without the clicks, thus making the wheel at 
+rest sometimes sensitive to minot non-click wheeling.  This can result in 
+seemingly spurious wheelings but they are a result of defective design in the 
+methodology of the mouse wheel sensing.  Complain to Logitech, not me!
+
+init with mm+ps2 protocol
+
+Thumb Down (Nothing Else Happened!)
+2520670 (  0MHz) : C8( -56)D2( -46)=11010010=-3, 2)  10(  16)=00010000= 1, 0)
+7257 (137MHz) : 08(   8)00(   0)=00000000= 0, 0)  00(   0)=00000000= 0, 0)
+
+Thumb Up (Nothing Else Happened!)
+1616259 (  0MHz) : C8( -56)D2( -46)=11010010=-3, 2)  00(   0)=00000000= 0, 0)
+6060 (165MHz) : C8( -56)D2( -46)=11010010=-3, 2)  00(   0)=00000000= 0, 0)
+10291 ( 97MHz) : C8( -56)D2( -46)=11010010=-3, 2)  00(   0)=00000000= 0, 0)
+10278 ( 97MHz) : 08(   8)00(   0)=00000000= 0, 0)  00(   0)=00000000= 0, 0)
+
+Byte 1
+C8h=200d=310o=11001000b
+                  ^--always there = 0x08
+
+Byte 2
+D2h=210d=322o=11010010b
+DEh=222d=336o=11011110b

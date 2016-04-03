@@ -1,0 +1,398 @@
+1.0.0.pre4:
+    "\(root\)" works for non-wheel-fifos, as long as @Exclude isn't used.
+        instead use :
+            "\(root\)"
+            ,Up,Button4
+            ,Down,Button5
+        etc... in your imwheelrc.
+    added mid-sequence keyups, put a - befreo the keysym for a keyup like this:
+            ".*"
+            ,Up,Shift_L|R|-R|-Shift_L|O|-O|F|-F|L|-L|Return
+        this will type "Rofl" and press return, in all apps, on wheel up.
+        make sure not to press something twice in a row without releasing it.
+    
+1.0.0.pre3:
+    added the --root-window (-r) option, for WM wheeling in the root of the
+    XServer.  use pattern "\(root\)" in the imwheelrc file.
+
+1.0.0pre2:
+    added --config (-c) option, open config window at start
+    added Button sending via XTest, use Button# as keysym in imwheelrc.
+    one less error on failing to open an empty filename
+    Thumb1 and Thumb2 (two thumb buttons) (Thumb == Thumb1)
+    README is no longer going to be updated, use the manpage after installation.
+    
+1.0.0pre1:
+    updated for gcc3.0
+    fixed configure dialog for XServer depth >16bits.
+        (please report if the configure dialog still fails for you now)
+    removed ye olde Makefile.unix
+
+0.9.9:
+    Documentation needs updating with the features from this release...argh!
+    Made some more comments in the stderr output...plus hints.
+    Fixed a segfault on freeing a few strings that were not allocated.
+    Added -g option for focus event tracking, so we at least try to regrab
+      whenever the focused (ungrabbed) window is left.
+        this was code from Patrick Reinelt <preinelt@kullen.rwth-aachen.de>
+        -g toggles it on an off, but it is on by default, as it may help some
+            people out there.
+  pre6
+    This may be the last update to the 0.9.9, pending any bugs.
+    CVS dirs removed in make dist process...
+    Upgraded GPM to version 1.19.3 and generated the patch as usual.
+    Added Artec UM530P driver (-t um530p) to gpm.
+        This is the imps2 init code without the second half.
+        Thanks to: Vicente Aguilar <vaguilar@linuxfreak.com>
+    Fixed some references to O_SYNC for FreeBSD users, who don't have it!
+    Reduced the fontspec in cfg.c to be more forgiving, may avert a SegFault!
+    Added an RPM Source spec file...it might work, I dunno!
+    imwheelrc now installs into /etc for "make install"
+    Added -Igetopt for when included getopt is used.
+    Added a transpose (-x) option to swap the X/Y axis.
+        Useful for S-48 OEM gpm driver, also use -b 54 option...
+        This is for fifo use only, which is working fine in XFree86 4.0.1
+    Added more sanity checks in configure.in 
+        getopt.h missing causes the included one to be used
+        XFree86 only checked for Linux systems
+    Added Linux Touch Panel Drivers for the Fujitsu Lifebook B112/B142
+        GPM driver to imwheel's gpm (-t b112)
+        Thanks to Harald Hoyer <Harald.Hoyer@Parzelle.De> <HarryH@Royal.Net>
+            who had the patches for gpm on his site http://parzelle.de/
+    Added Logitech OEM S-48 & Firstmouse+ to gpm (-t zilog)
+        This works for a Logitech OEM S-48 that I received as a donation
+        Thanks to A. Norman <norman@physics.wm.edu> posting his sourcecode!
+            His site is at:
+              http://www.physics.wm.edu/~norman/Mouse_Diag/index.html
+    Added a script to convert the Right-handedly oriented imwheelrc file to
+        Left handed (converts _L to _R in the imwheelrc)
+        It's simple so patterns matching the _L string will be changed to _R
+            watch out for that I suppose...but I haven't seen anything like
+            that in other places of the rc file.
+        The script is called lefty.sh, execute it before "make install" if you
+            are a left handed person or you prefer the right side control keys.
+  pre5
+    Replaced strsep usage for intel solaris people.
+    Fixed the fact that a missing "(null)" section would cause a segfault.
+    Fixed an UNGRAB(Exclude) handling code error.
+    Optimized the UNGRAB/GRAB search, now we don't go looking for a reason not
+        to UNGRAB all the time!
+    Added --buttons or -b option, whichs allows you to set the button mapping.
+        Default mapping looks like this: "45678"
+        You can limit it to just 4 and 5 by doing: imwheel -b 45
+        This also allows some people to fix the mapping for weirdo mice ;)
+        Here's a reference table for what the numbers mean:
+
+            index    default button    action in imwheel
+              1             4           Wheel/Stick Up
+              2             5           Wheel/Stick Down
+              3             6           Wheel/Stick Left
+              4             7           Wheel/Stick Right
+              5             8           Thumb Button
+
+        So that "imwheel -b 86754" does the following:
+            Button 8 is Wheel/Stick Up to imwheel
+            Button 6 is Wheel/Stick Down to imwheel
+            Button 7 is Wheel/Stick Left to imwheel
+            Button 5 is Wheel/Stick Right to imwheel
+            Button 4 is Thumb Button to imwheel
+        Use xev while NOT running imwheel (run "imwheel -kq" first) to find out
+            what buttons are what on your mouse!
+    Fixed the non-functional Configure Dialog (XGrabButton wasn't working right)
+  pre4
+    Fixed == tests to = in configure.in, per many complaints. (worked for me ;)
+    Updated gpm to version 1.19.2, people kept asking...
+  pre3
+    Fixed security bug, where a user may symlink to a file they cannot open as
+        themselves, then get the first line of that file using the debug mode.
+        This could allow the root password of the shadow to be exposed for any
+        user who has access to a set-uid-root imwheel.
+        Apparently Mandrake (and others perhaps) use a suid-root perl script to
+        execute the imwheel program, perhaps meaning to be more safe.  In
+        reality I do not install imwheel as root, nor do I actively support it,
+        nor take any responsibility for those who do install it as a suid-root
+        or suid any other user, and who then have a security breach.  I'm also
+        happy that my friend, Rob C. Ludwick, pointed the hole out to me, as
+        no-one on the mailing list he saw this being discussed on bothered to
+        write me!  Also, about the distros suid perl script jazz...this is the
+        second time you've caused me pain, and I'm bitter, and I have no remorse
+        for you if you shall perish one million deaths through your foolishness
+        of suid-root wrappers.
+    One other note, imwheel already DOES check that any process it is looking
+        to kill is actually an imwheel process.  If this needs improvement
+        then somebody send in a patch.  I currently consider the possibility
+        impossible.  (Yes, I like English!)
+  pre2
+    Added @Priority to allow for people who want visible control over what is
+        more important than whatever else.  See imwheelrc for more. (tested)
+    Fixed the @Exclude bug, where if @Exclude was used with a ".*" regex then
+        all windows were excluded, even those defined in the imwheelrc.
+        The new priority command can help users tell imwheel how much they'd
+        really like to exclude and what doesn't need to be, otherwise position
+        in the imwheelrc is all that makes the difference now. (tested)
+    Fixed the configuration errors, where variables were unquoted and spaces
+        may have freaked m4 and the shell out!
+  pre1
+    fixed getenv("HOME") type security hole. (tested)
+    inclusion of imwheelrc, but no "make install" installation yet.
+--------------------------------------------------------------------------------
+0.9.8
+    finished configure "make dist" handling of unselected stuff.
+    seems to work well for all beta testers (at least 5 people wrote back)
+  pre4
+    fixed @Exclude (tested myself of course, waiting for feedback)
+    fixed PIDFILE crap from making the configure.in wrongly...
+        hey - I'm still learning autoconfig and friends... ;)
+  pre3
+    configure (full autoconf, automake, autoheader dealie)
+    updated gpm to version 1.19.0
+    added -v and --version option, for just the version header of the help
+    there will be NO MORE none gpm releases until gpm includes my patch in the
+        main distribution!  configure doesn't play nice doing dual distros...
+  pre2
+    updated gpm to version 1.18.1
+  pre1
+    tfxmms - in gpm - the Serial Trackman FX marble button 4 as stick motion
+                      toggle and complete mouse driver.
+    sensitivity option in imwheel - uses a summation of motion after
+                                    thresholding, to determine when to go!
+    @Repeat command (like @Exclude) in imwheelrc files - resends the button to X
+        this may not work for non-gpm wheelfifo users, who should rather use
+        @Exclude for now.
+    minor code cleanups - no bugfixes there!  just making code better looking.
+--------------------------------------------------------------------------------
+0.9.7
+    Added --force option to force usage of event data instead of looking for
+      the focused window using XGetInputFocus.  This may work better for some
+      window managers than others.  In fvwm2 I do not use the force option,
+      whereas in window maker it may be mandatory.  I know it's silly but when
+      you use the force option you are using the ICCCM method of grabbing the
+      current client window, whereas the deffault operation uses the original
+      XGetInputFocus method.  All you need to know is that if the debug output
+      keeps showing the the window title as null, then toggle this option and
+      it may work correctly.  Please report back to me on window managers and
+      whether the force option was required or not to work correctly with
+      imwheel.  This method was sparked by Brian Craft <bcboy@cisco.com>.
+    Fixed a bug where if the winid was not being copied into a correctly sized
+      space, therefore causing segfaults when reading an rc like this...
+      
+      ".*\.[pP][dD][fF]"
+      Alt_L,Up,Up
+
+      Note that the window match string is longer than the keydef line.  This
+      is when this bug would rear it's ugly head.  It was a dead-in-the-head
+      bug that I'm sorry I ever caused to anyone who suffered while making a
+      customized rc file.  I'm just amazed that I never ran into it in my time!
+      This bug was noted by Karoly Segesdi <vrm@scene-hu.com> if not
+      by others as well!  (But he got me closest to finding the problem by
+      giving me an imwheelrc file that consistently caused a segfault)
+      
+    Fixed a bug where imwheel whould exit when the fifo it was reading for the
+      wheel-fifo method was closed and reopened and then written from the other
+      side (from gpm or jam restarting).
+    Upgraded to gpm-1.18.0
+    Added marblefx support to gpm from Ric Klaren <klaren@cs.utwente.nl>,
+      untested as I don't have a marblefx.  It looked good though!
+    Added Primax CyberNavigator [1] mouse to gpm from Alexios Chouchoulas
+      <alexios@vennea.demon.co.uk>.  This is also untested for the same reason.
+    Added left handers Method#1 xmodmap config sent in from
+      Marc-Aurèle DARCHE <ma.darche@stellarx.com> to README and manpage.
+    And of course other misc. bugfixes, etc...that I've forgotten over time!
+--------------------------------------------------------------------------------
+0.9.6
+    Initial support & drivers (gpm & imwheel) for IBM ScrollPoint Mouse
+      It is the mm+ps2 mouse type in gpm
+      the IBM ScrollPoint PS/2 mouse uses the MouseManPlus Protocol in XFree86
+      Support for up and down only for now...I must do a bit before other
+       directions are considered! (for stick type mice thingers.)
+      Pressing continuously will only result in one action.  Release and press
+       again to scroll another notch.  (the regular scroll events come in too
+       fast to be useful yet...)
+      THANKS!!!!! TO Felix Klock for the ScrollPoint Mouse he MAILED ME!!!
+       This driver is due to the initiative and sacrifice of a few bucks to get
+       support for a mouse this guy loves...and from what I've read on newgroups
+       many others also love!  Well you owe the possibility of this driver to
+       Bryan for mailing me a mouse to be able to actually hack on the real
+       thing.  Now continued support is guaranteed as well!
+       mail your appreciation to Felix S Klock at pnkfelix@mit.edu
+       He paid $23 or so for the mouse plus shipping to me (with normal 32cent
+       stamps no less...due to the effects of the 1cent price increase in stamps
+       I'm sure he was kinda glad to be rid of some of his 32cent stash to make
+       room for the 33cent ones!)  Please consider sending him a dollar for his
+       effort since you are reaping the rewards... (and hey send me a dollar! :)
+    Added mdump, a program to dump the mouse port, and anything else you want
+      with a bitwise breakdown and a 3 byte per line dump.  Other interpretation
+      is added for assumptions of what may be happening with mouse motions.
+      I used this program to create the mm+ps2 driver for gpm.  It is not
+      installed by 'make install' so copy it yourself if you're interested.
+      the first arg on the command-line is taken to be the path of the mouse
+      device, which defaults to /dev/mouse.  The second arg is how many bytes
+      to dump per grab. This defaults to 3 but 4 is another common value to try.
+      The third arg is not parsed but if present the first byte will be bit
+      dumped like the rest of the bytes in a packet.
+      You can also use this program to see the MHz speed for your mouse!
+      e.g.:  mdump /dev/psaux 4 1   (for imps2 mouse device type)
+             mdump /dev/psaux 3 1   (for ps2/mouseman+ mouse device types)
+    Added to mouse-mode setup programs for the intellimouse and mouseman plus.
+      running these programs sends the right control codes to the mouse to
+      activate the intellimouse or mouseman plus protocol.  The intellimouse and
+      mouseman plus both default to ps2 mode.  the intellimouse and mouse man
+      plus both support the imps2 protocol.  some mouse man plus type mice may
+      not be intellimouse capable, but the IBM scrollpoint was capable of this
+      mode, restricting it to up and down wheel emulation on it's stick.  To
+      reset mouse run setps2.  setimps2 is for the intellimouse protocol.
+      setmmplus is for the mouseman plus protocol.  us getmdt to see the mouse's
+      reponse to the mouse device type probe.  The codes I've seen are as
+      follows (<nn> is in hex format):
+        <00>  mouseman plus (3 byte packets)
+        <03>  intellimouse  (4 byte packets)
+        <00>  plain ps2     (3 byte packets)
+                when mouse is this, <AA> is received also after an <FA>
+      Any <FA> type codes are ignored mouse responses, usually confirmation of
+      the mouse receiving the controls the program sends it.
+    All these debugging  programs default to the /dev/mouse device node unless a
+      path is passed in as the first argument.
+    None of the debugging programs have been tested with serial mice.
+    Fixed a missed regrab of the mouse after the configurator is closed.
+    Pid file is only used if user is using the /dev/gpmwheel FIFO. (Method #2)
+    Killing pids according to pidfile now checks to make sure the process is
+      truely an imwheel process, and only kills it if it is an imwheel process.
+      It also will only kill if using the /dev/gpmwheel FIFO.
+    Imwheel funtions correctly on multiple displays by using the -display
+      option or setting the DISPLAY environment variable (use export/setenv!)
+    Thanks to Arnd Bergmann <arnd@uni.de> we now have gpm support for the
+      Knopex Wineasy 4D mouse.  And due to his patches and them prompting me to
+      update lotsa code we have support for intellimouse serial, as well as
+      support for sideways actions.  This is only available through the FIFO.
+      You must use Method#2 (a variant of which that is) that uses the wheel
+      FIFO as set up by gpm.  XWindows cannot handle the 7 buttons correctly,
+      it can only handle 5, which means only up and down will work with
+      Method #1!
+    Added FreeBSD support, see the FREEBSD file for more.  It requires no
+      changes to compile and install.
+    Added threshhold option for stick users of method #2 (it requires gpm)
+      Use the -t or --threshhold option to set a threshhold from 0-7.
+      The default is 2, it works well.
+    Added no-middle-button option (-n) to gpm.  Use this if you have trouble
+      with unintentional middle button clicks while wheeling/sticking, and you
+      would rather use Emulate3Buttons chording in X (XFree86 at least...)
+    Added conditional compile for gpm-imwheel directory.
+    Added a full manpage.
+--------------------------------------------------------------------------------
+0.9.5
+    Finished off configure dialog to spec, it's just a helper, not an editor!
+    Updated gpm to version 1.16.0, now sticking with stable versions.
+    - hopefully I'll get a patch and send it to the gpm team for some
+      integration, thus releasing me from this task...
+        - the gpm library is still untested in the console...should work though!
+          see note in version 0.8 below.
+    Added suid option to "make install" for users other than root to be able
+      to run with a pid file.  The default action is yes if nothing is entered
+      at the prompt.  I felt that 'yes' had to be the default action to avoid a
+      bunch of newbie email.  This doesn't allow users to install imwheel as
+      root, and it's not a security risk.  this is for sys-admins, or at least
+      root users to be able to get all their users using the pid file for the 
+      daemon and also for them to be able to kill off old daemons started by
+      other users before.
+    Added -p option for no pidfile stuff, be careful though, this allows any
+      user to start imwheel regardless of a previous imwheel process!
+    Added -D for debug output anytime (no recompiling for those bug reports!)
+      - use the -d option to avoid backgrounding the process!
+    Fixed silly free(NULL) crap...(heh, betchyall loved that one!)
+    added rxvt stuff to imwheelrc file.
+    added EMACS file (an email from an avid wheeler! oh, and it's about emacs!)
+--------------------------------------------------------------------------------
+0.9:
+    Configuration helper almost done. (still need to sample wheel actions!)
+    - use up,down,up in the root window to activate!
+    - all functions in window are fully functional.
+    - restart does restart imwheel and thus reread the rc files
+    - grab windows by clicking the snapshot and then on the desired window
+    - more to come!
+    More options and abilities:
+        - daemon mode
+            -d to NOT detach and daemonize!
+        - kill any existing imwheel
+            -k to kill any existing imwheel as a restart
+        - quit after rc files
+            -q, used best with -k to kill any imwheel process and quit
+    More configuration options:
+        - added 2 separately configurable delays
+          fixes netscape dropping keys! (it must queue only one key...)
+          first delay is the delay between repetitions (keyup->keydown)
+          second delay is the delay between pressing and releasing
+                                                       (keydown->keyup)
+          see the new imwheelrc for the netscape values that work for me!
+--------------------------------------------------------------------------------
+0.8:
+    Modified gpm 1.15 beta2 for wheel support.  I dunno about the gpm user
+       library and wheel stuff, but it may work with GPM_B_UP and GPM_B_DOWN.
+       use the -W (and -w for non-IM mice) for use with "imwheel --wheel-fifo"
+    IMWheel interfaces with /dev/gpmwheel, use the "--wheel-fifo" option, or
+       "-W /dev/gpmwheel", the -- option has /dev/gpmwheel as the default.
+       Don't forget to reconfigure your mouse pointer in XConfig...
+--------------------------------------------------------------------------------
+0.7:
+    No segfaults!  Thank God!  New functionality!
+    New Command structure started, and Exclude command added.
+    - Exclude ungrabs mouse for selected windows.
+    More commands may now be added as needed!
+    XV's window grabber was dying because it needed to grab all buttons...
+    - use the line "@Exclude" in an "xv grab" window section. See imwheelrc
+--------------------------------------------------------------------------------
+0.6:
+    Argh...another bugfix for segfaults...now you don't need an rc file.
+--------------------------------------------------------------------------------
+0.5:
+    Argh...a bugfix for segfaults...this time it doesn't care about windows that
+       don't have either title, resource, or class names set (leaving them NULL)
+    Thanks for all the positive response and encouragement.
+    Multi-rep scrolling actions can cause less then you expected to happen.
+    - Be patient, it works most of the time.  There is no way I can find to fix
+      this, so help may be needed!  You will find XSync in use, but I believe
+      that has a minimal effectiveness...makes it work better than before though
+    Moving out of windows and losing focus may cause weird things to happen!
+    - Press and release all modifier keys (alt,ctrl,shift,etc.) to reset input.
+--------------------------------------------------------------------------------
+0.4:
+    finally! Config file support is added, completing the keyboard config setup.
+    /etc/imwheelrc and/or $HOME/.imwheelrc files are used for configuration.
+    built-ins are still available for unconfigured windows.
+    anybody want to make a client to make configuration a breeze?  Contact me!
+    all clients that have keyboard input can be used with configuration!
+    no new options.
+    more code moving, now two files, whopee you say!  but it made development
+       easier!
+    got reports that KDE compatabilty has been achieved by v0.3
+--------------------------------------------------------------------------------
+0.3:
+    added options engine.
+    added -f or --flip-buttons option to flip behavior, useful for 4 button mice
+    changed engine, now using XTest extension instead of XSendEvent crap.
+    - still grabbing buttons which may be part of the incompatibility with KDE.
+    added other mice that should work as well, according to XFree86 docs.
+    added a grab reset sequence, but it seems to be a nop...
+    - run imwheel again if it dies and leaves your server going funky...
+    cleaned out junk from old engine, new code is cleaner...I think so anyways!
+    XTest extension now required (not checked in code...I may do that)
+    More clients work than ever!
+    Reps for sideways motion (alt-wheel actions) now work in netscape...
+    - only when there are sideways scrollbars
+    - May work everywhere, i dunno!
+    - It works in all tested clients that use cursor left/right keys for actions
+--------------------------------------------------------------------------------
+0.2:
+    cleaned up exit on bad display opening.
+    changed library directory to X11R6 instead of X11
+    received confirmation of compatability with Logitech MouseMan+ from:
+        "Markus Martensson" <mortis@acc.umu.se>
+    modifier combinations of Shift,Control, and Alt(Meta) changes behavior.
+    repetition of keystrokes
+    still no setup files...
+    still no change in clients...
+--------------------------------------------------------------------------------
+0.1:
+    first release
+    streamlined version, unused code is compiled out.
+    no setup, hardcoded page up and page down!
+    no exclusion for specific windows either.

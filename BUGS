@@ -1,0 +1,59 @@
+                        KNOWN BUGS for current version.
+Please only report with new bugs, patches or suggestions, not these bugs!
+
+Really weird things can happen...like keys still acting like they're pressed.
+- If the focus is changed while wheeling actions are going on...hoo boy.
+- If the modifier(s) are let up while wheeling actions are going on...hoo boy.
+- To reset virtually stuck keys press and release all of them once, that works!
+
+Non-wheel-fifo users that have things like the following in the imwheelrc:
+	Shift_L, Up, Button4
+- will find that to send the Button4, imwheel must ungrab the mouse buttons
+  meaning that REAL mouse button events have a chance to slip through.
+  this results in unknown behaviour.
+- the best solution is to find keys that do the same function, and use them
+  in your imwheelrc, instead of sending ButtonN events.
+
+Memory footprint too big, says one person...
+- Mine runs at about 1620 bytes well what am I gonna do!
+
+@Exclude not excluding (at least since 0.9), may still not work in 0.9.7
+- Method#1 users who use xv need this...
+- could someone else please play with this.  XWheel won't care about this
+  problem as it is now, because it will be more integrated into the low level.
+
+Configuration dialog doesn't grab wheel actions for Method#1
+- Oops...it's not that useful anyways.
+
+          OLD FIXED BUGS!  It's always nice to see what's been fixed!
+
+See Changes file for bug updates...keeping track in two places sucked eggs!
+
+Wheel stops working after a canceled configuration box.
+- FIXED in 0.9.6, appeared along with configurator in 0.9
+  configuration now regrabs the mouse buttons after a canceled configuration
+
+Crashes with a segfault after some wheeling
+- FIXED in 0.9 (second version)
+
+No button event passthrough for clients with .Xdefaults support activated.
+XV Grabber dies!  It can't grab the mouse!
+- FIXED in v0.7, was there from v0.1!  Added @Exclude command.
+
+Segfaulting on no rc files...
+- FIXED in v0.6, introduced in v0.4, along with config files...
+
+Segfaulting on NULL window title,class or resource names...
+- FIXED in v0.5, introduced in v0.4, along with config files...
+
+Netscape doesn't respond to more than one up and down at a time.
+- FIXED in v0.3!  try the alt sequences! they work as designed!
+
+xman does not respond.
+- FIXED in v0.4
+
+All KDE clients reported to not respond.
+- reported FIXED in v0.3
+
+May cause some windows to hate the synthetic keys being pressed...
+-- FIXED in v0.3, all keys are nonsynthetic...just check it out in xev!!

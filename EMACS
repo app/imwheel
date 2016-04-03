@@ -1,0 +1,110 @@
+From - Sat Dec 19 00:50:58 1998
+Received: from mail.iol.ie (mail2.mail.iol.ie [194.125.2.193])
+	by solaris1.mysolution.com (8.8.5/8.8.5) with ESMTP id UAA19253
+	for <jcatki@mysolution.com>; Sat, 21 Nov 1998 20:29:45 -0500 (EST)
+Received: from sto-kerrig.ie (dialup-003.clonmel.iol.ie [194.125.43.195]) by mail.iol.ie 
+	  Sendmail (v8.9.1) with ESMTP id BAA26997 for <jcatki@mysolution.com>;
+	  Sun, 22 Nov 1998 01:35:28 GMT
+Received: from sto-kerrig.ie (IDENT:sneakums@sto-kerrig.ie [127.0.0.1])
+	by sto-kerrig.ie (8.9.1/8.9.1) with ESMTP id VAA04923
+	for <jcatki@mysolution.com>; Sat, 21 Nov 1998 21:14:36 GMT
+Message-Id: <199811212114.VAA04923@sto-kerrig.ie>
+Date: Sat, 21 Nov 1998 21:14:33 +0000
+Content-Type: text
+Status: OR
+X-Mozilla-Status: 8001
+X-Mozilla-Status2: 00000000
+X-UIDL: 18c7143e5bfe082df1a908f7bd6ccdcb
+From: Paul J Collins <sneakums@usa.net>
+To: jcatki@mysolution.com
+Subject: emacs imwheel settings
+
+I've been messing with imwheel with a Logitech Mouseman Wheel, and
+I've finally gotten nice smooth scrolling with Emacs.
+
+Add the following to your .emacs:
+
+;;; For imwheel
+(setq imwheel-scroll-interval 3)
+(defun imwheel-scroll-down-some-lines ()
+  (interactive)
+  (scroll-down imwheel-scroll-interval))
+(defun imwheel-scroll-up-some-lines ()
+  (interactive)
+  (scroll-up imwheel-scroll-interval))
+(global-set-key [?\M-\C-\)] 'imwheel-scroll-up-some-lines)
+(global-set-key [?\M-\C-\(] 'imwheel-scroll-down-some-lines)
+;;; end imwheel section
+
+Add the following to your ~/.imwheelrc:
+
+"emacs"
+Shift_L, Up, Page_Up
+Shift_L, Down, Page_Down
+None, Down, Control_L|Alt_L|Shift_L|parenright
+None, Up, Control_L|Alt_L|Shift_L|parenleft
+
+Leaving out the Shift_L part makes emacs think you've typed C-M-9 and
+C-M-0.  Holding down left shift (you can add right if you like) will
+scroll by pages, and with no modifiers, scrolling is by
+imwheel-scroll-interval lines.  For modes such as mail summary
+buffers, it is easy to bind C-M-( and C-M-) to next-message, or
+whatever.
+
+Cheers
+
+----------------p!
+
+--
+Paul Collins <sneakums@usa.net>   Public Key On Keyserver.
+INGREDIENTS: AQUA, ALUMINIUM ZIRCONIUM TETRACHLOROHYDREX GLY, ALCOHOL
+DENAT, DIMETHICONE, PROPYLENE GLYCOL, CYCLOMETHICONE, DIMETHICONE
+COPOLYOL, PARFUM.
+
+
+--------------------------------------------------------------------------------
+
+
+From - Tue Mar 30 02:19:44 1999
+Received: from pi.novedia.de (nit.cs.tu-berlin.de [130.149.16.233])
+        by solaris1.mysolution.com (8.8.5/8.8.5) with ESMTP id KAA08475
+        for <jcatki@mysolution.com>; Mon, 29 Mar 1999 10:58:59 -0500 (EST)
+Received: (from fm@localhost)
+        by pi.novedia.de (8.8.8/8.8.8) id SAA20776;
+        Mon, 29 Mar 1999 18:05:57 +0200
+From: Frank Meissner <Frank.Meissner@novedia.de>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Date: Mon, 29 Mar 1999 18:05:57 +0200 (CEST)
+To: Paul J Collins <sneakums@usa.net>, jcatki@mysolution.com
+Subject: XEmacs-Keybinding-Syntax in EMACS, imwheel-package
+X-Mailer: VM 6.43 under 20.4 "Emerald" XEmacs  Lucid
+Message-ID: <14079.41844.191690.742135@pi.novedia.de>
+Content-Type: text/plain; charset=us-ascii
+X-Mozilla-Status: 8001
+X-Mozilla-Status2: 00000000
+X-UIDL: 4a6ee4a74675e43bc0f9ec33957bc78d
+
+Hi,
+
+just a small addition to the EMACS-File, because for someone it may be
+hard to get the keybindings right (I had to try two times and got one
+help request from a co-worker)
+
+The correct syntax for keybinding in xemacs is the following:
+
+(define-key global-map [(control \))] 'imwheel-scroll-up-some-lines)
+(define-key global-map [(control \()] 'imwheel-scroll-down-some-lines)
+
+Perhaps you could add this to the EMACS-File.
+
+Anything else goes really well, even Quake accepts the
+wheel. Allthough I did'nt get the killer-keybinding or -alias, perhaps
+you have a hint? Anyway, thanks for the great package and greetings
+from berlin.
+
+Frank
+
+-- 
+SIGTHTBABW: a signal sent from Unix to its programmers at random
+intervals to make them remember that There Has To Be A Better Way.

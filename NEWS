@@ -1,0 +1,101 @@
+You might be looking for the ChangeLog file...
+
+Testing Results:     (Thanks to all who have responded, keep up the great work!)
+
+    Mice that are reported working (XF86-Mouse gpm-type):
+        Intellimouse PS/2 (IMPS/2 or imps2/MouseSystems)
+        - including Intellieye mice, except any thumb buttons on the Pro version
+		  for that you need X support for buttons 5 and 6 or jam...
+        Intellimouse Serial (Intellimouse ms3)
+        Logitech PS/2 (MouseManPlusPS/2 mm+ps2) Serial (MouseManPlus mman)
+        - Trackman Marble FX (gpm -t tmmfx w/Method#2)
+            serial mouse driver, works like in windows.
+        - Marble FX (gpm -t marblefx w/Method#2)
+            new driver in gpm may give FULL functionality using Method #2
+            this works like in windows, click on/off for wheel functions
+			other setups may only leave you with the Up dir, see also imwheel -4
+        - Marble +
+        - Pilot Mouse+
+        - Cordless Wheel Mouse (Method #1 @least)
+        - Mouseman Wheel (Method #1 @least)
+        - Cordless Wheel Mouse PS/2 (gpm -t mm+ps2 w/Method#2)
+        - Firstmouse
+        - Logitech M-BA47 (imps2 for non OEM-color label on mouse)
+        Genius PS/2
+        - NetMouse Pro PS/2
+        - NewScroll/PS2 (1:IMPS/2 or 2:imps2/MouseSystems)
+        - Trust Ami Mouse Scroll Pro Excellence series
+        - WinEasy 4D
+        - Primax CyberNavigator [1] mouse
+        - Ami Mouse Scroll Pro (Excellence Series)
+            says Jay at predator1710@gmx.net
+        - Arowana PS/2 WheelMouse
+            says frank.van.geirt@pandora.be
+		- Dexxa Optical Pro (PS/2)
+			uses imps/2 type drivers
+
+    Mice I support due to having them:
+        Intellimouse PS/2
+        IBM ScrollPoint PS/2
+
+    Works Great With:
+        Netscape (3.04, 4.0x, 4.5) (click to change wheel focus)
+        - All Netscape clients: Mail, Composer, etc...
+        - click to focus on frames. (Forms work now like they should!)
+        XLess
+        GVim (Lesstif)
+        XiTerm
+        ETerm
+        NXTerm
+        rxvt
+		- rxvt/src/feature.h has several scroll-related options
+		- you may want to compile rxvt without scroll wheel support
+        Acroread 3.1 and up
+        xterm (including scrolling the xterm itself!)
+        - scrolling XTerm (instead of typing in it) is possible when the config
+          file is set up.  The included imwheelrc has a setting that uses alt
+          for scrolling the actual scrollbar on the xterm!
+        - shift up and down work in bash!
+        - if using vim or less, the plain/shifted/controled wheel works as
+          expected!
+        MGV
+        ghostview
+        some lesstif/motif windows, like file selectors... (click to focus!)
+        KDE stuff (what? well...anything that has key responses!)
+        XMan (requires an .imwheelrc configuration as included in archive)
+        Staroffice 4.0 and up
+        XV (window grab...may need help, read on)
+        - Needs configuration, see @Exclude command notes in README, unless...
+        - if used with wheel fifos in gpm and imwheel, it's fine!
+        emacs (see EMACS file for some help if you want it!)
+        KDE (kfm, kmail, etc...)
+
+        Any client that accepts keyboard control should be configurable,
+          if not, work without configuration but with the built-in defaults!
+
+    Not Working At All:
+        XFree86 4.0 support for /dev/gpmdata or /dev/jam_*:* FIFO mouse devices
+        - use the ZAxis method, and if your mouse doesn't work...try again.
+          or fallback to the 3.2+ server distros - argh.
+        Clients that don't expect any keys at all.
+        - There is no way to do this, except maybe X server ICC...but I don't
+          know any of that stuff, I only know about it, and it's C code calls.
+        Console
+        - I'm looking into this, now that I tangled with gpm for wheel info!
+        QTronix (?) mouse - which one???  we need the init code apparently.
+
+    May work, But it depends on which Method and which client:
+        Wheel buttons in KDE clients when using wheel-fifo.
+        - I mean KDE client that use actual wheel mouse stuff, won't...
+          since the wheel is not going through the XServer at all!
+          unless they expect pageup/pagedown too...
+          in method #1 you can exclude these windows and they should work!
+
+    XServers that may work if used with the included gpm and imwheel wheel fifo:
+        XInside's Accelerated-X (There is no wheel support in AccelX!)
+        - you must use the included gpm and imwheel with the wheel fifo options!
+
+    XServers that are thought so far to be useless with a wheel mouse:
+        Any win32 XServer software that has no XTest extension.
+        - XVision has support I think, I'll test it at work, if I ever boot into
+          NT again.  I haven't run NT in 5 weeks now, and I don't intend to!

@@ -1,0 +1,720 @@
+.TH IMWheel 1 "September 8 2002" "Version 1.0.0"
+.UC 1
+.SH "NAME"
+imwheel \- a mouse wheel and stick interpreter for X Windows
+.SH "SYNOPSIS"
+\fBimwheel\fP [ \fIoptions\fP ]
+.br
+.SH "DESCRIPTION"
+\fIIMWheel\fP is a universal mouse wheel and mouse stick translator for the X 
+Windows System.  Using either a special version of gpm and it's /dev/gpmwheel 
+FIFO, or the support for a ZAxis on the mouse built into some servers, such as 
+XFree86.  Utilizing the input from gpm or X Windows, imwheel translates mouse 
+wheel and mouse stick actions into keyboard events using the XTest extension to 
+X.  Use \fIxdpyinfo\fP for information on the supported extensions in your X 
+server.
+.LP
+.SH "COMMAND LINE OPTIONS"
+Available command line options are as follows:
+.TP
+\fB-4, --flip-buttons\fP
+Flips the mouse buttons so that 4 is 5 and 5 is 4, reversing
+the Up and Down actions.  This would make 4 buttons somewhat useful!
+This is the similar to using "-b 54678", see the \fB-b\fP option.
+See also xmodmap(1).
+.TP
+\fB-b, --buttons\fP \fIbutton-spec\fP
+Remap buttons in \fIbutton-spec\fP to interpreted wheel/thumb input.
+Also limits the button grab to the specified buttons when using the ZAxis method.
+(see "X WINDOWS ZAXIS METHOD" below)
+the \fIbutton-spec\fP may specify any of up to five buttons.
+the \fIbutton-spec\fP is decoded in the following order for wheel input:
+.RS
+.RS
+.nf
+
+Index   Interpreted As    Button Number
+.br
+1       Wheel Up          4
+.br
+2       Wheel Down        5
+.br
+3       Wheel Left        6
+.br
+4       Wheel Right       7
+.br
+5       Thumb Button 1    8
+.br
+6       Thumb Button 2    9
+
+.fi
+.RE
+A \fIbutton-spec\fP of "45" will limit the grabbed buttons for only wheel up and down.
+.br
+A \fIbutton-spec\fP of "67" may be useful to use actual buttons 6 and 7 as wheel up
+and down, and limit the grab to only those two buttons.
+.br
+A \fIbutton-spec\fP of "0" turns off any defined mapping, thus allowing for skips in
+the \fIbutton-spec\fP for something that doesn't exist on your mouse.
+.br
+A \fIbutton-spec\fP of "45006" may be for normal wheel up/down and a thumb button 1, but
+no horizontal wheel axis.
+.br
+The default \fIbutton-spec\fP is "456789".
+.br
+See also xmodmap(1).
+.RE
+.TP
+\fB-c, --config\fP
+Popup to configuration helper window imediately.
+.br
+See also \fBCONFIGURATION HELPER\fP
+.TP
+\fB-D, --debug\fP
+Show all possible debug info while running.  This spits out alot and I also 
+suggest using the \fB-d\fP option to prevent imwheel from detaching from the 
+controlling terminal.
+.TP
+\fB-d, --detach\fP
+Actually this does the opposite of it's name, it prevents detachment from the 
+controlling terminal.  (no daemon...)  Control-C stops, etc...
+.TP
+\fB-f, --focus\fP
+Forces the X event subwindow to be used instead of the original hack that would 
+replace the subwindow in the X event with a probed focus query (XGetInputFocus).
+This should fix some compatability problems with some window managers, such as
+window maker, and perhaps enlightenment.  If nothing seems to be working right,
+try toggling this on or off...
+.TP
+\fB-g, --focus-events\fP
+Disable the use of focus events for button grabs.  If your \fB@Excluded\fP windows
+are not regrabbing the mouse buttons when exited, try toggling this on or off...
+.TP
+\fB-h, --help\fP
+Short help on options plus version/author info.
+.TP
+\fB-k, --kill\fP
+Attempts to kill old imwheel (useful only for \fB--wheel-fifo\fP method.)
+Pidfile must be created for this to work (no \fB-p\fP or \fB--pid\fP option on
+the previous imwheel invocation).  Process IDs are
+tested using /proc/${pid}/status Name: field ?= imwheel. 
+If /proc is not mounted then this fails everytime!
+Otherwise, this ensures that the wrong process is not killed.
+.TP
+\fB-p, --pid\fP
+Don't write a pid file for gpmwheel FIFO method.  This is the only
+method that uses the pid file.  XGrab doesn't need it, so it just
+issues a warning about starting multiple imwheels on the same
+display.  Some people really prefer this, especially when they are
+not using a SUID root imwheel executable.
+.TP
+\fB-q, --quit\fP
+Quit imwheel before entering event loop.  Usful in killing an
+imwheel running in gpmwheel FIFO mode after exiting XWindows,
+if you're using pid files that is.
+.br
+Example: `imwheel -k -q' = kill and quit (option order doesn't matter)
+.TP
+\fB-s, --sensitivity\fP \fIsum-min\fP
+(Stick mice, Wheel FIFO method only)
+.br
+like \fB-t\fP only this sets a minimum total amount of movment of the
+stick or marble, before any action is taken.  This works good
+with the Marble type devices.
+This should be a multiple of the threshhold as given by the \fB-t\fP option.
+The default is 0, meaning that there is no sensitivity testing,
+all input spawns an event.
+See the \fB-t\fP option also.
+(see "STICK SENSITIVITY SETTINGS" below)
+.TP
+\fB-t, --threshhold\fP \fIminimum-pressure\fP
+Used with gpm only and then only with recognized stick mice.
+stick mice send a pressure value ranging from 0(no pressure) to
+7(hard push).  This sets the minimum required pressure for
+input to be registered.  Setting it to zero will cause realtime sticking,
+which is usually too much action for X to keep up. (max rate i saw was
+100 events a second!).  Once input is registered, it is summed up per axis,
+and then it must equal or exceed the sensitivity setting to pass as an input.
+See the \fB-s\fP option also, for sensitivity.
+.br
+The default is 2, to avoid slight presses on the 90-degree direction of the 
+intended while still getting to the intended direction.  Setting this to 7 is 
+insane, because it requires the user to push as hard as possible everytime they 
+want something to happen!  However it may not be so insane for people using
+trackballs for input, as they may spin much faster per sample...
+.br
+(see "STICK SENSITIVITY SETTINGS" below)
+.TP
+\fB-W, --wheel-fifo\fP \fIfifo\fP
+Use the gpm/jamd wheel fifo instead of XGrabMouse.  See \fBGPM/JAMD WHEEL FIFO METHOD\fP 
+section.  This method allows only one X display to be used.  This is required 
+for the gpm method to work.  This method only works with the imwheel version
+of gpm and with jamd.  To find out if you are running the imwheel version of gpm
+use the following command and look for "(imwheel)" in the title:
+.RS
+.RS
+.nf
+
+gpm -v
+
+.fi
+.RE
+\fIfifo\fP names the named pipe (FIFO) created by gpm.  It defaults to 
+"/dev/gpmwheel" (for \fB--wheel-fifo\fP only).  The FIFO must exist before 
+running imwheel in this mode.  using jamd requires you to name the correct fifo
+because it doesn't use /dev/gpmwheel, but rather one of the /dev/jam_imwheel:0.0
+named fifos created by jamd's imwheel module.
+.br
+\fB@Exclude\fP commands in the rc file are unused in this mode.
+.RE
+.TP
+\fB-X, --display\fP \fIdisplay\fP
+Use XServer at a specified \fIdisplay\fP in standard X form.  
+Using this option is usful for multiple displays in the X Window ZAxis Method.
+.TP
+\fB-x, --transpose\fP
+
+This swaps the X and Y axis of movement for stick input from a wheel-fifo.
+.LP
+.SH "X WINDOWS ZAXIS METHOD"
+This method is the only method that works with multiple X displays, using
+multiple imwheels.  Use multiple imwheels by either setting the DISPLAY
+environment variable before running each imwheel, or use the \fB-X\fP or 
+\fB--display\fP options to specify a different display for each imwheel.  
+Running multiple imwheels on the same display is not recommended, but is 
+allowed, and may cause strange things to happen while using the stick or wheel.
+.LP
+Edit the XF86Config and add/edit the following lines in the 
+"Pointer"(XFree86 3.3) or
+"InputDevice"(XFree86 4.x)
+section:
+.LP
+1 axis (vertical wheel):
+.RS
+.nf
+(XFree86 3.3)
+.RS
+Buttons 5
+ZAxisMapping 4 5
+.RE
+(XFree86 4.x)
+.RS
+Option "Buttons" "5"
+Option "ZAxisMapping" "4 5"
+.RE
+.fi
+.RE
+.LP
+2 axis (1 stick or 2 perpendicular wheels):
+.RS
+.nf
+(XFree86 3.3)
+.RS
+Buttons 7
+ZAxisMapping 4 5 6 7
+.RE
+(XFree86 4.x)
+.RS
+Option "Buttons" "7"
+Option "ZAxisMapping" "4 5 6 7"
+.RE
+.fi
+.RE
+.LP
+The Buttons option may be greater than stated above if you have thumb
+buttons, or other extras that qualify as buttons.
+.LP
+Make sure your Protocol is set to either "IMPS/2" for a PS/2 mouse
+or for serial mice set it to "IntelliMouse" or "Auto".
+This is for IntelliMouse compatible mice, other protocols may be required for other mice.
+Then while running X Windows run imwheel \fIwithout\fP the \fB--wheel-fifo\fP
+or \fB-W\fP options.
+.LP
+.B NOTE
+.br
+The \fB@Exclude\fP command must be used for clients that either use the ZAxis 
+for themselves and have no keyboard translations to cause the same desired 
+effect.  The \fB@Exclude\fP command must also be added for any client requiring 
+mouse and/or mouse button grabs and that don't specify specific buttons to 
+grab.  These clients fail when they try to grab the mouse because the buttons 4 
+and 5 are already grabbed by imwheel.  XV is an example of a client that 
+requires these types of grabs to succeed.  KDE clients use the ZAxis for their 
+own purposes.  The supplied imwheelrc included and exclusion for XV already.  
+See the IMWheelRC section for more information.
+.LP
+Also pid files are not used for this method.  Thus the \fB-p\fP and \fB--pid\fP
+options have no effect, and are ignored.
+.LP
+.SH "GPM/JAMD WHEEL FIFO METHOD"
+This method is REQUIRED for any X Windows server without wheel
+mouse support built in.  This method will currently support mice as supported
+through gpm or jamd.
+.LP
+In the Pointer section of your XF86Config (or the equivalent configuration file 
+for your X server) change your mouse Protocol to be "MouseSystems" 
+(or the equivelant...), also change the Device file that the mouse is read from
+to "/dev/gpmdata", then restart X Windows if it is running.
+jamd will replicate to /dev/jam_ps2:0.0 or some other devices as well,
+make sure to use the right X Mouse protocol in this case,
+like the jamd_ps2 device is X mouse protocol PS/2,
+and the jamd_imps2 device is X mouse protocol IMPS/2.
+.LP
+Before starting X Windows (re)start gpm with the \fB-W\fP option.  Make sure
+you are using a supported wheel or stick mouse as stated in the gpm man page.
+.LP
+After starting X Windows run imwheel as follows adding options as desired:
+.LP
+for gpm you can use the following option to imwheel
+.LP
+\fB--wheel-fifo\fP
+.LP
+jamd requires you specify the fifo name as one of the /dev/jamd_imwheel:0.0
+named fifos.  Run
+.LP
+\fBls -al /dev/jam_imwheel*\fP
+.LP
+to see what is available.
+In this example I would use 
+.LP
+\fB-W /dev/jam_imwheel:0.0\fP
+.LP
+as the option to imwheel.
+.LP
+I usually add the \fB-k\fP option to kill off any old imwheel processes left 
+over, as imwheel doesn't exit with the server, but rather it will only die if a 
+wheel or stick action occurs when an X server is not connected, such as when X 
+is dead or the DISPLAY environment variable is setup wrong, or the \fB-X\fP or 
+\fB--display\fP variables connected imwheel to a now defunct X server.
+.LP
+gpm or jamd, and/or imwheel can be restarted at any time, imwheel can sense when
+gpm of jamd is not there, and gpm nor jamd doesn't give a hoot about imwheel 
+being up or not.
+.LP
+.B NOTE
+.br
+The @Exclude command has no bearing in this method, it is ignored.  No Focus
+change events are received in this method.  Thus KDE and other clients that
+support X based wheel events through the ZAxis are not going to work except
+through normal imwheel keypress translation of wheel and stick actions.
+.br
+XV will function fine, as will any client that grabs the mouse and/or mouse
+buttons.  This mode doesn't use any grabs to function.
+.LP
+.SH "STICK SENSITIVITY SETTINGS"
+The \fB-s\fP and \fB-t\fP options specify a sensitivity and threshhold.
+each movement of a stick, or trackball, must equal or exceed the threshhold to
+be added to the respective axis sum.  In other words if you puch the stick up
+hard enough to exceed the threshhold then the Y axis sum would be increased by
+however much you pressed up.
+.LP
+Next the summed X and Y axis movement is each compared to the sensitivity setting.
+If the sensitivity setting is equalled or exceeded, then one imwheel event is spawned,
+thus after pressing up for a bit, the Y sum exceeds the sensitivity and a wheel up
+event is interpreted by imwheel into an action such as a PageUp key.
+.LP
+The sensitivity therefore must be greater than the threshhold for it to have any
+bearing on the input.  Pseudo code such as the following may explain:
+.RS
+.nf
+if(input >= threshhold)
+.RS
+sum = sum + input
+.RE
+if(sum >= sensitivity) {
+.RS
+do an imwheel action
+sum = 0
+.RE
+}
+.fi
+.RE
+.SH "IMWHEELRC"
+IMWheel uses, optionally, two configuration files.  One called /etc/X11/imwheel/imwheelrc,
+which is used for everybody.  The other is $HOME/.imwheelrc, used only for one
+user.  One is supplied and should have been installed automatically in /etc/X11/imwheel/
+if not also in the installing users $HOME as well.  All whitespace is ignored
+in the files except for within the window names' double quotes.
+.LP
+The configuration file consists of window names and event translations and/or
+imwheel commands that begin with an `@' (at) symbol.  Each window name starts a
+section that is it's configuration.  The window names a priortized as first
+come first served, so more generic matches should always occur later in the
+configuration file.
+.LP
+Comments are started with a pound (#) and extend to the end of the line.
+.LP
+.SH "IMWHEELRC WINDOW SECTION HEADERS"
+Window name section headers are actually one of four things:
+.LP
+.nf
+Window Title
+Window Class Name
+Window Resource Name
+(null) which matches "\\(null\\)" in the imwheelrc
+.fi
+.LP
+Most of these are probe-able using fvwm2's FvwmIdent module or the configurator
+(see the \fBCONFIGURATION HELPER\fP section).  Other window managers may have their
+own method of identifying windows' attributes.
+.br
+Each window name is matched as a regex string.  Thus any window is matched using
+the regex pattern ".*" as a window name.  This pattern should be the last
+section in your configuration file, or it will override the other window
+configurations in the file for matched wheel/stick actions.
+.br
+There is one special header noted as "(null)" which matches windows that have a
+null string in the three attributes.  This makes it possible to assign actions
+to even Quake3, which has no info for it's window.  Just make sure that you
+realize that the keys used should not be keys that may conflict with other
+key actions in the game or application you are aiming to make work!
+The included imwheelrc file has a "(null)" section included to demonstrate, and
+it should work with Quake3.
+.br
+Each window/class/resource name \fImust\fP be enclosed in double quotes (") on a line by
+itself.
+.LP
+Inside each window section is any number of translation definitions or commands.
+Each translation definition or command must be on a line by itself.  The window section doesn't have to be terminated, as it is terminated by either starting
+another window section or the end of the configuration file.
+.LP
+.SH "IMWHEELRC TRANSLATION DEFINITIONS"
+Mouse wheel/stick translations each take up a line after a window section has
+been started.  Each argument is seperated by commas(,) whitespace is ignored.
+KeySyms are used to specify the keyboard input and outputs.  pipes (|) are used
+to join multiple keys into one input/output.
+The format is as follows:
+.LP
+.B REQUIRED
+.br
+The following arguments a required to make a minimum translation definition.
+.TP
+\fIKey Modifiers Input\fP
+X KeySyms joined by pipes that indicate the required keys pressed when the
+mouse action is made in order for this translation to be used.  Alt, Meta,
+Control, and Shift keys are typical modifiers, but are stated slightly different
+than just `Shift' but rather `Shift_L' or `Shift_R', differentiating between
+left and right shift keys.  See the KeySyms section for more.
+
+`\fBNone\fP' is a special KeySym used by imwheel, it is used to indicate no
+modifiers.  A blank entry is also acceptable in this case, but less descriptive
+of what is going on!  If `\fBNone\fP' is used then there can be no modifiers
+in use during the wheel action.  If the field is blank then \fIany\fP modifier
+will match, so put these last in their window section.
+.TP
+\fIMouse Action Input\fP
+This is the input from the mouse wheel or stick.  It is one of the following and
+\fIonly\fP one:
+
+.nf
+Up
+Down
+Left
+Right
+Thumb
+.fi
+
+These are self explanatory.  If you have trouble use the configurator!
+.TP
+\fIKey Action Output\fP
+Out KeySyms are placed here.  See KeySyms section for more on all available 
+KeySyms.  Join KeySyms using pipes.  Output keys are pressed in order and 
+released, in reverse order, only after all have been pressed, likely making 
+them all combined as in `Control_L|C' which would be a `^C' (control-c) 
+keypress.
+.LP
+.B OPTIONAL
+.br
+The following options are optional, but to use one you must fill in all the
+preceding arguments.
+.TP
+\fIOutput Repetitions\fP
+How many times should the Output KeySyms be pressed in a row.
+
+Default is 1.
+.TP
+\fIDelay Before KeyUp Event\fP
+How long in microseconds until we release all the Output KeySyms in one Output
+Repetition.
+
+Default is 0.
+.TP
+\fIDelay Before Next KeyPress Event\fP
+How long in microseconds until we press the next the Output KeySyms.
+Ths delay occurs after the Output KeySyms are released.
+
+Default is 0.
+.LP
+.SH "IMWHEELRC COMMANDS"
+Commands start with the `@' character.  Commands are as follows:
+.TP
+\fB@Exclude\fP
+Exclude this window from imwheel grabing mouse events.  imwheel will ungrab
+the mouse when these windows are entered and not regrab the mouse until focus
+is changed to a non-excluded window.  This allows the ZAxis button events to
+pass through normally and mouse grabs to succeed.
+.br
+XV and KDE clients need this for the X Windows Method.
+.br
+This command has no effect in the GPM Method.  The mouse isn't grabbed, nor are
+ZAxis button events created by the server.
+.TP
+\fB@Repeat\fP
+Repeat the mouse button to the window. This cause a mouse button to be generated
+in the current window.  It does not use XSendEvent so the mouse button presses
+are indistiguishable from the real thing.  This mode is not compatible with the
+XGrabButtons method of imwheel, otherwise listed as the ZAxis Method in this manpage.
+.br
+Motions are mapped as follows:
+.RS
+.RS
+.nf
+
+Up     is button 4
+Down   is button 5
+Left   is button 6
+Right  is button 7
+Thumb1 is button 8
+Thumb2 is button 9
+.fi
+.RE
+.RE
+.TP
+\fB@Priority\fP=\fIpriority\fP
+Using this is allowed in each window/class/resource section.
+Higher \fIpriority\fP values take precedence over lower ones.
+Equal priorities on sections make the imwheelrc file parsed from top to bottom
+to find the first match.
+Thus \fB@Priority\fP can be used to make the file search for matches out of order,
+then you dont have to keep the entries in order if you so please.
+the supplied imwheelrc file contains extensive comments and examples of the
+\fB@Priority\fP function.
+.br
+The default \fIpriority\fP for any new section is 0.
+The last \fB@Priority\fP command in a section overrides all previous priorities
+for that section.  Thus each section has only one \fIpriority\fP setting in the end.
+Priorities are kept as an int, thus range from INT_MAX to INT_MIN.
+(see /usr/include/limits.h for these values on your system)
+.LP
+.SH "CONFIGURATION HELPER"
+IMWheel contains a semi-hidden configuration helper which can be brought up
+by rolling/sticking up and down a few times in the root window of the X server.
+Inside this window you can find out possible window names to use in your
+imwheelrc file.  Press on the mini-screen capture to grab another window, 
+including the root window (whole screen).
+.LP
+Mouse wheel and stick actions can be grabbed along with
+active modifier keys on the keyboard.  The mouse wheel/stick action is displayed
+and the X KeySyms are displayed beneath it.  All this information can be
+directly entered into an imwheelrc as desired.
+.LP
+IMWheel can be restarted to read in a changed imwheelrc file or the 
+configurator can be canceled causing imwheel to resume oprations without 
+reading the configuration file.  To restart imwheel execs itself as called by 
+the user in the first place but adding the \fB-R\fP option to indicate to 
+itself that this is a restarted imwheel.  The \fB-R\fP is not for use by the 
+user, as it bypasses some configuration of imwheel.
+.LP
+.SH "KEYSYMS"
+The program expects combinations of keysyms to be used by using pipe(|) 
+characters to combine them together.
+.LP
+Example:
+.RS
+.nf
+Alt_R|Shift_R
+
+.fi
+Means right alt \fIand\fP right shift together, not just either one or the
+other!  And not one after the other, they are both pressed at the same time
+essentially.
+.RE
+.LP
+For FIFO users, it is possible to send a real mouse button event, using
+the special \fBButton#\fP syntax.  An imwheelrc keysym of Button1 would 
+send a real Mouse button 1 (left mouse button) event.  Mouse4 is what you'd want
+for a MouseWheelUp type event.  Mouse5 is what you want to MouseWheelDown event.
+Many applications will understand the meaning of mouse button 4 and 5, but most don't
+go beyond that.  So \fIMouse6 and greater have no "standardized" meaning\fP.  The Button# syntax
+can be combined with regular keysyms, to send keys and mouse buttons at the same time.
+.LP
+Example:
+.RS
+.nf
+Shift_L|Button4
+    - meaning left shift and wheel up.
+Button5
+    - meaning wheel down.
+.fi
+.RE
+.LP
+Other button to imwheel meaniful references:
+.RS
+.nf
+KeySym   IMWheel Input  Real Mouse
+------   -------------  ----------
+Button1  (none)         Left Mouse Button
+Button2  (none)         Middle Mouse Button
+Button3  (none)         Right Mouse Button
+Button4  Up             Mouse Wheel Up
+Button5  Down           Mouse Wheel Down
+Button6  Left           Mouse Wheel Left
+Button7  Right          Mouse Wheel Right
+Button8  Thumb1         Side Mouse Button 1 (left/up)
+Button9  Thumb2         Side Mouse Button 2 (right/down)
+.ni
+.RE
+.LP
+Common Modifier Keysym names used in X:
+.nf
+Shift_L     Shift_R
+Control_L   Control_R
+Alt_L       Alt_R
+.fi
+.LP
+These are probably not currently assigned any keys, unless you \fIxmodmap\fP them in:
+.LP
+.nf
+Meta_L      Meta_R      (Actually, Sun keyboards have this...)
+Super_L     Super_R
+Hyper_L     Hyper_R
+.fi
+.LP
+And here's some that you may use, and they are \fIsomewhere\fP on your keyboard:Here's where they were on my keyboard, again, this is not universal.
+Use the \fIxev\fP program to test your own keys on your keyboard!
+.LP
+.nf
+Caps_Lock   = The Caps Lock key!
+              (This still turns on and off caps lock!)
+Num_Lock    = The Num Lock key!
+              (This is not good to use...
+               for the same reasons as Caps_Lock)
+Multi_key   = The Scroll Lock key!
+              (Go figure!)
+Mode_switch = Right Alt...for me anyways.
+              (This mean I cannot use Alt_R)
+.fi
+
+The windows keys may not be assigned any KeySyms, but they will have numbers.
+\fIxmodmap\fP can be used to assign them to a real KeySym.
+.LP
+To find keysym names for any keys available see the 
+\fB/usr/include/X11/keysymdef.h\fP file, and for any define in that file 
+remove the "XK_" for the usable KeySym name in the configuration file.
+The path to this file may differ for you.
+.LP
+Remember, there's always the configurator.
+And \fBxev\fP will also help here too!
+.LP
+.SH "WHEEL OR STICK AS MIDDLE BUTTON IN X"
+Configure the XF86Config without "Emulate3Buttons" and increase "Buttons" if it is 2
+in the Ponter or InputDevice section.  The wheel or stick  will act as a real
+middle button and the outer two buttons will act as separate buttons (1 and 3),
+even when pressed together.
+.LP
+Of course if your wheel keeps clicking middle button while you're trying to use the
+wheel you may want to activate the Emulate3Buttons option to disable the wheel button!
+And donn't forget to reduce the Buttons argument to 2!
+.LP
+.SH "LEFTY BUTTON MAPPING IN X WINDOWS"
+For those of you lefties out there using method #1, the non-gpm method this
+command may help you get the buttons set up correctly in XWindows for both
+left handed and imwheel use.
+.LP
+.RS
+.nf
+xmodmap -e "pointer = 3 2 1 4 5"
+  \fIor\fP
+xmodmap -e "pointer = 3 2 1 4 5 6 7"
+  \fIetc...\fP
+xmodmap -e "pointer = 3 2 1 4 5 6 7 8 9"
+
+NOTE: most of these are NOT going to work, because of all the limits in X.
+.fi
+.RE
+.LP
+add more numbers to the end of this line if you have more buttons!
+.LP
+.SH "BUGS"
+Of course...but most of the time it's just that you haven't read everything I've written here and in the files of the distribution itself.  Even then, you may be giving up too easily.  Keep trying, it's not that hard.  I am always working on reducing strange behavior.  This is still a beta, as indicated by the leading 0 in the version number.
+.LP
+.B Real Bugs
+.LP
+imwheel doesn't get along with itself on the same X display or using the same
+gpmwheel FIFO. - This will always be your fault :-/
+.LP
+Stick mice are still a pain in the butt to use. - This is the manufacturer's fault.
+Or X Windows fault, for not having a method to easily use such devices in all applications.
+.LP
+Keyboard focus isn't changed automatically to input keys into Window mouse is
+over.  This only occurs with Click-to-Focus type focus managment in window managers.
+I use sloppy focus in fvwm2, which always works for me. - Whose fault \fIis\fP this?
+(Switch focus modes and/or window managers, or try the \fB-f\fP option on imwheel)
+.LP
+Configuration file is not validated for correctness nicely...although it does
+get preparsed before the main program starts, thus stopping you before you run
+with an invalid configuration file.  I just have never made a bad configuration
+file, so I guess I'll have to try and do that to see what happens.  Just don't
+make any mistakes and you'll be fine. - This is my fault?! ;)
+.LP
+.SH "HOMEPAGE"
+.nf
+http://jonatkins.org/imwheel
+.fi
+
+.LP
+.SH "AUTHOR"
+Jonathan Atkins <jcatki@jonatkins.org>
+
+.LP
+.SH "FILES"
+.nf
+$HOME/.imwheelrc
+	The users configuration file.
+
+/etc/X11/imwheel/imwheelrc
+	The global location for the configuration
+	file, it is always loaded.  Overided by
+	the users configuration file.
+
+/dev/gpmwheel
+	The default wheel FIFO from gpm, if used.
+
+/dev/jam_imwheel:0.0 (or other numbers...)
+	A wheel FIFO from jamd, if used, must be specified.
+	jamd allows more than on FIFO, and thus allows more than
+	one instance of imwheel to be running on the same computer
+	when running imwheel on multiple displays
+	using the Wheel FIFO method.
+
+/tmp/imwheel.pid
+	The public area for imwheel's pid file.
+
+/var/run/imwheel.pid
+	The private area for imwheel's pid file.
+.fi
+
+.LP
+.SH "SEE ALSO"
+.nf
+\fBjamd(1)\fP
+    Jon Atkins Mouse - a replacement/augmentation for/to gpm.
+\fBxwheel(1x)\fP
+    The new replacement for imwheel.  Uses jamd instead of gpm or ZAxis.
+	(may not be available yet)
+\fBxdpyinfo(1x)\fP
+    X Display information, including extensions.
+\fBgpm(8)\fP
+    General Purpose Mouse, imwheel edition required.
+\fBFvwmIdent(1x)\fP
+    FVWM2's Identify module, for probing windows.
+\fBregex(7)\fP
+    POSIX 1003.2 Regular Expressions.
+\fBxmodmap(1x)\fP
+    Utility for modifying keymap & button mappings in X.
+\fBxev(1x)\fP
+    Print contents of X events.
+\fB/usr/include/X11/keysymdef.h\fP
+    X11 KeySym definitions.
+\fB/usr/include/limits.h\fP
+    INT_MIN and INT_MAX definitions.
+.fi

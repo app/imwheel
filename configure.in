@@ -1,0 +1,349 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(imwheel.c)
+AC_PREREQ(2.13)
+AM_INIT_AUTOMAKE(imwheel,1.0.0pre12)
+
+dnl local
+Warnings=0
+Good=xyes
+
+dnl Get system type
+system=`uname -s`
+dnl echo system=$system
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_RANLIB
+AC_PROG_MAKE_SET
+dnl AC_PREFIX_PROGRAM(bin/imwheel)
+AM_CONFIG_HEADER(config.h)
+dnl AC_CONFIG_HEADER(config.h)
+
+
+dnl Checks for libraries.
+dnl there are none here...see the X libraries section below!
+
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS(fcntl.h sys/time.h unistd.h getopt.h)
+
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_PID_T
+AC_HEADER_TIME
+
+
+dnl Checks for library functions.
+AC_TYPE_SIGNAL
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS(gettimeofday regcomp strdup strtol getopt_long_only)
+
+
+dnl check that regcomp was found
+AC_MSG_CHECKING(that regex functions are available)
+if [[ "x$ac_cv_func_regcomp" = "$Good" ]]
+then
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+	AC_MSG_ERROR([regex functions not found, imwheel really needs these!])
+fi
+
+
+dnl ask about PIDDIR
+AC_MSG_CHECKING(where the pid file goes)
+AC_ARG_WITH(pid-dir,
+changequote({, })dnl
+{  --with-pid-dir=dir      use dir for pid files [/tmp]},
+changequote([, ])dnl
+[if [[ "x$withval" != "x" ]]
+then
+	PIDDIR="$withval"
+else
+	AC_MSG_ERROR([bad dir supplied for --with-pid-dir])
+fi],[PIDDIR="/tmp"])
+AC_MSG_RESULT($PIDDIR)
+AC_DEFINE_UNQUOTED(PIDDIR,"$PIDDIR",[Where do we want the pid file to go? ])
+dnl AC_SUBST(PIDDIR)
+
+dnl ask whether to suid root the imwheel executable on installation
+AC_ARG_ENABLE(suid,
+changequote({, })dnl
+{  --enable-suid=user      suid user [default=root] the imwheel executable [no]},
+changequote([, ])dnl
+[case "$enableval" in
+	yes) suid=root ;;
+	no)	suid= ;;
+	*)	if [[ "x$enableval" = x ]]
+		then
+			suid="root"
+		else
+			suid="$enableval"
+		fi;;
+esac],[suid=])
+AC_MSG_CHECKING(if we suid imwheel at install)
+if [[ "x$suid" = "x" ]]
+then
+	AC_MSG_RESULT(no)
+else
+	AC_MSG_RESULT([yes, $suid])
+fi
+AC_SUBST(suid)
+AM_CONDITIONAL(SUID, test "x$suid" != x)
+
+dnl ask about getopt or detect it
+getopt_dist=
+AC_MSG_CHECKING(if we use the included getopts)
+AC_ARG_WITH(getopt,
+changequote({, })dnl
+{  --with-getopt           use included getopt [guessed]},
+changequote([, ])dnl
+[case "$withval" in
+	yes) getopt=getopt ;;
+	no)  getopt= ;;
+	*)   AC_MSG_ERROR([bad value $withval for --with-getopt]) ;;
+esac],[getopt=])
+if [[ "x$ac_cv_func_getopt_long_only" != "$Good" -o "x$ac_cv_header_getopt_h" != "$Good" ]]
+then
+	getopt=getopt
+	AC_MSG_RESULT(yes)
+else
+	if [[ "x$getopt" = "xgetopt" ]]
+	then
+		AC_MSG_RESULT(forced)
+	else
+		AC_MSG_RESULT(no)
+		getopt_dist=getopt
+	fi
+fi
+AC_SUBST(getopt)
+if [[ "x$getopt" = "xgetopt" ]]
+then
+	GETOPT_LIBS="-L$srcdir/getopt -lgetopt"
+	GETOPT_INCS="-I$srcdir/getopt"
+else
+	GETOPT_LIBS=
+	GETOPT_INCS=
+fi
+AC_SUBST(GETOPT_LIBS)
+AC_SUBST(GETOPT_INCS)
+AC_SUBST(getopt_dist)
+
+
+dnl ask about mdetect
+AC_MSG_CHECKING(if we build mdetect)
+AC_ARG_ENABLE(mdetect,
+changequote({, })dnl
+{  --enable-mdetect        build mdetect, a ps/2 mouse data detector [no]},
+changequote([, ])dnl
+[case "$enableval" in
+	yes) mdetect=mdetect ;;
+	no)  mdetect= ;;
+	*)   AC_MSG_ERROR([bad value $enableval for --enable-mdetect]) ;;
+esac
+mdetect_dist=],[mdetect=
+mdetect_dist=mdetect
+])
+if [[ "x$mdetect" = "xmdetect" ]]
+then
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
+AC_SUBST(mdetect)
+AC_SUBST(mdetect_dist)
+
+
+dnl ask about mdump
+AC_MSG_CHECKING(if we build mdump)
+AC_ARG_ENABLE(mdump,
+changequote({, })dnl
+{  --enable-mdump          build mdump, a ps/2 mouse data dumper [no]},
+changequote([, ])dnl
+[case "$enableval" in
+	yes) mdump=mdump ;;
+	no)  mdump= ;;
+	*)   AC_MSG_ERROR([bad value $enableval for --enable-mdump]) ;;
+esac
+mdump_dist=],[mdump=
+mdump_dist=mdump.c])
+if [[ "x$mdump" = "xmdump" ]]
+then
+	AC_MSG_RESULT(yes)
+else
+	AC_MSG_RESULT(no)
+fi
+AC_SUBST(mdump)
+AC_SUBST(mdump_dist)
+
+
+dnl ask about extras
+EXTRAS="setimps2 setmmplus getmdt setps2 setps2rate"
+EXTRAS_SRC="setimps2.c setmmplus.c getmdt.c setps2.c setps2rate.c"
+AC_MSG_CHECKING(if we build extras)
+AC_ARG_ENABLE(extras,
+changequote({, })dnl
+{  --enable-extras         build some extra ps/2 mouse debugging utils [no]},
+changequote([, ])dnl
+[case "$enableval" in
+	yes) extras=yes ;;
+	no)  extras= ;;
+	*)   AC_MSG_ERROR([bad value $enableval for --enable-extras]) ;;
+esac],[extras=])
+if [[ "x$extras" = "$Good" ]]
+then
+	AC_MSG_RESULT(yes)
+	extras="$EXTRAS"
+	extras_dist=
+else
+	AC_MSG_RESULT(no)
+	extras_dist="$EXTRAS_SRC"
+fi
+AC_SUBST(extras)
+AC_SUBST(extras_dist)
+
+
+dnl Check for gpm-imwheel source.
+NO_GPM_DOC=
+GPM_DIR="gpm-1.19.3"
+AC_SUBST(GPM_DIR)
+AC_CHECK_FILE($GPM_DIR/gpm.c,HAVE_GPM_SRC=yes,HAVE_GPM_SRC=no)
+AC_SUBST(HAVE_GPM_SRC)
+AC_MSG_CHECKING(if we build gpm-imwheel)
+gpm_enabled=no
+gpm_doc=no
+gpm_imwheel=$GPM_DIR
+AC_ARG_ENABLE(gpm,
+changequote({, })dnl
+{  --enable-gpm           build gpm-imwheel [build if source present]},
+changequote([, ])dnl
+[case "$enableval" in
+	yes) gpm_imwheel="$GPM_DIR"
+	     gpm_enabled=yes ;;
+	no)  gpm_imwheel= ;;
+	*)   AC_MSG_ERROR([bad value $enableval for --enable-gpm]) ;;
+esac],[gpm_imwheel=])
+AC_ARG_ENABLE(gpm_doc,
+changequote({, })dnl
+{  --enable-gpm-doc       build in gpm/doc  [build if source present]},
+changequote([, ])dnl
+[case "$enableval" in
+	yes) no_gpm_doc=true ;;
+	no)  no_gpm_doc=false ;;
+	*)   AC_MSG_ERROR([bad value $enableval for --enable-gpm-doc]) ;;
+esac],[no_gpm_doc=true])
+if [[ "x$HAVE_GPM_SRC" = "$Good" ]]
+then
+	if [[ "x$gpm_imwheel" = "x$GPM_DIR" ]]
+	then
+		AC_MSG_RESULT(yes)
+		AC_CONFIG_SUBDIRS(gpm-1.19.3)
+		AC_DEFINE_UNQUOTED(HAVE_GPM_SRC,1,[Define only if you are building the imwheel version of gpm. ])
+		AM_CONDITIONAL(NO_GPM_DOC, $no_gpm_doc)
+	else
+		AC_MSG_RESULT(no)
+		AM_CONDITIONAL(NO_GPM_DOC, false)
+	fi
+else
+	gpm_imwheel=
+	if [[ "x$gpm_enabled" = "xyes" ]]
+	then
+		AC_MSG_RESULT(unable)
+		AM_CONDITIONAL(NO_GPM_DOC, false)
+		AC_MSG_WARN([$GPM_DIR building disabled, source not present!])
+		Warnings=`expr $Warnings + 1`
+	else
+		AC_MSG_RESULT(no)
+		AM_CONDITIONAL(NO_GPM_DOC, false)
+	fi
+fi
+gpm_dist="$GPM_DIR"
+AC_SUBST(gpm_imwheel)
+AC_SUBST(gpm_dist)
+
+
+dnl Checks for X.
+AC_PATH_X
+AC_PATH_XTRA
+
+
+dnl Check for XFree86.
+dnl AC_MSG_CHECKING(if we want to check for XFree86)
+dnl AC_ARG_ENABLE(check-xfree86,
+dnl changequote({, })dnl
+dnl {  --disable-check-xfree86 don't check the X server vendor [enabled]},
+dnl changequote([, ])dnl
+dnl [case "$enableval" in
+dnl 	yes) check_xfree86=yes ;;
+dnl 	no)  check_xfree86= ;;
+dnl 	*)   AC_MSG_ERROR([bad value $enableval for --enable-check-xfree86]) ;;
+dnl esac],[check_xfree86=yes])
+dnl if [[ "x$check_xfree86" = "$Good" -a "$system" = "Linux" ]]
+dnl then
+dnl 	AC_MSG_RESULT(yes)
+dnl 	XPath=$PATH:/usr/X11R6/bin:/var/X11R6/bin:/usr/X11/bin:/var/X11/bin:/usr/openwin/bin:/bin:/usr/bin:/usr/local/bin
+dnl 	AC_CHECK_PROGS(X, X Xwrapper XF86_SVGA XF86_VGA16 Xsun, noX, $XPath)
+dnl 	if [[ "x$X" != "xnoX" ]]
+dnl 	then
+dnl 		AC_MSG_CHECKING(if $X is XFree86)
+dnl 		XFree86="`( PATH=$PATH:$XPath ; $X -version 2>&1 | grep \"XFree86 Version\" | head -1 ) 2>/dev/null | cut -f1 -d ' '`"
+dnl 		dnl echo XFree86=$XFree86
+dnl 		if [[ "x$XFree86" = "xXFree86" ]]
+dnl 		then
+dnl 			AC_MSG_RESULT(yes)
+dnl 		else
+dnl 			AC_MSG_RESULT(no)
+dnl 			AC_MSG_WARN([You are not using XFree86, IMWheel may still work])
+dnl 			AC_MSG_WARN([  provided your Xserver has the XTest extension built])
+dnl 			AC_MSG_WARN([  and you choose you mouse drivers and method of wheel])
+dnl 			AC_MSG_WARN([  input wisely.  Other servers may not support the wheel.])
+dnl 			AC_MSG_WARN([  In that case you should use the gpm or jam method of])
+dnl 			AC_MSG_WARN([  input for wheel data to imwheel.])
+dnl 			Warnings=`expr "$Warnings" + 1`
+dnl 		fi
+dnl 	fi
+dnl else
+dnl 	AC_MSG_RESULT(no)
+dnl fi
+
+dnl Check for X include.
+dnl AC_CHECK_HEADERS(X11R6/Xlib.h,, [
+dnl		AC_MSG_ERROR([IMWheel depends on the X11 include files!])
+dnl ])
+
+dnl Checks for X libraries.
+LIBS_saved="$LIBS"
+LIBS=
+AC_CHECK_LIB(X11, XCreateWindow,, [
+	AC_MSG_ERROR([IMWheel depends on the X11 libraries!])
+], $LIBS_saved $X_LIBS)
+AC_CHECK_LIB(Xext, XextAddDisplay,,,$LIBS_saved $X_LIBS)
+AC_CHECK_LIB(Xt, XtFree,,,$LIBS_saved $X_LIBS)
+AC_CHECK_LIB(Xmu, XmuInternAtom,,,$LIBS_saved $X_LIBS)
+AC_CHECK_LIB(Xtst, XTestFakeDeviceKeyEvent,, [
+	AC_MSG_ERROR([IMWheel depends on the XTest extention!])
+],$LIBS_saved $X_LIBS)
+X_LIBS="$X_LIBS $LIBS"
+LIBS="$LIBS_saved"
+
+
+dnl end with a possible about any warnings...
+if [[ "$Warnings" != "0" ]]
+then
+	echo ""
+	if [[ "$Warnings" != "1" ]]
+	then
+		echo "You had $Warnings warnings during configure, imwheel may not compile or run."
+	else
+		echo "You had a warning during configure, imwheel may not compile or run, or it may"
+		echo "have an incomplete package built."
+	fi
+	echo ""
+fi
+
+dnl final output
+AC_OUTPUT(jax/Makefile Makefile mdetect/Makefile getopt/Makefile)
