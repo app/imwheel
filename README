@@ -1,3 +1,11 @@
+Ubuntu install
+sudo apt-get install libxtst-dev
+sudo apt-get install libxmu-dev
+./configure --disable-gpm-doc
+make
+
+
+
                                            www.FreshMeat.net appindex# 903164189
 
                                     Overview
