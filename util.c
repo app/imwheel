@@ -1470,22 +1470,7 @@ void sensitivXTestFakeKeyEvent(Display* display,unsigned int keyCode,Bool isPres
 
     keyUpEvent=!isPressed;
 
-    /*printf("=============== keyCode=%d\n",keyCode);*/
-
-    /*if (keyCode!=64 && keyCode!=113 && keyCode!=114 ) {*/
-        /*XTestFakeKeyEvent(display,keyCode,isPressed,delay);*/
-        /*st_sum = 0;*/
-        /*printf("============= SUM RESET 00000000000000000000000 ====== st_sum is 0\n");*/
-        /*return ;*/
-    /*}*/
     if (sensitivity <= 0) {
-        printf("===== exit with sensitivity=%d \n",sensitivity);
-        /*if (keyUpEvent ){*/
-            /*printf("==================================================================================================== Fired UP event,keyCode=%d\n",keyCode);*/
-        /*}*/
-        /*else {*/
-            /*printf("==================================================================================================== Fired Down event,keyCode=%d\n",keyCode);*/
-        /*}*/
         XTestFakeKeyEvent(display,keyCode,isPressed,CurrentTime);
         return ;
     }
@@ -1502,32 +1487,18 @@ void sensitivXTestFakeKeyEvent(Display* display,unsigned int keyCode,Bool isPres
         }
     }
 
-
-
     gettimeofday(&myntv,NULL);
     if(!firstPressedEventTime.tv_sec)
         memcpy(&firstPressedEventTime,&myntv,sizeof(struct timeval));
 
-
     dt=((myntv.tv_sec-firstPressedEventTime.tv_sec)*one10sec*10)+(myntv.tv_usec-firstPressedEventTime.tv_usec);
 
-    /*printf("===== time diff=%lu \n",dt);*/
-    /*printf("===== st_sum=%d, sensitivity=%d\n",st_sum,sensitivity);*/
-    /*printf("===== threshhold=%d\n",threshhold);*/
-    
     if (dt > threshhold*one10sec && keyUpEvent){
         if ((key64Clicked && key113Clicked  && key114Clicked)){
             //  Reset key events count
             st_sum = 1;
             memcpy(&firstPressedEventTime,&myntv,sizeof(struct timeval));
-            /*printf("TIME RESET!===========================================TIME RESET! TIME RESET!\n");*/
         }
-        /*if (keyUpEvent ){*/
-            /*printf("==================================================================================================== Fired UP event,keyCode=%d\n",keyCode);*/
-        /*}*/
-        /*else {*/
-            /*printf("==================================================================================================== Fired Down event,keyCode=%d\n",keyCode);*/
-        /*}*/
         XTestFakeKeyEvent(display,keyCode,isPressed,CurrentTime);
         return ;
     }
@@ -1543,13 +1514,11 @@ void sensitivXTestFakeKeyEvent(Display* display,unsigned int keyCode,Bool isPres
     }
 
     if (keyUpEvent ){
-        /*printf("==================================================================================================== Fired UP event,keyCode=%d\n",keyCode);*/
 
         if ((key64Clicked && key113Clicked) || (key64Clicked && key114Clicked)){
             //  Clear state to count from very begining
             st_sum = 0;
             memcpy(&firstPressedEventTime,&zerotime,sizeof(struct timeval));
-            /*printf("============= SUM RESET 00000000000000000000000 ====== st_sum is 0\n");*/
         }
     }
     else {
@@ -1562,12 +1531,12 @@ void sensitivXTestFakeKeyEvent(Display* display,unsigned int keyCode,Bool isPres
         if (keyCode == 114){
             key114Clicked = False;
         }
-        /*printf("==================================================================================================== Fired Down event,keyCode=%d\n",keyCode);*/
     }
-
 
     XTestFakeKeyEvent(display,keyCode,isPressed,CurrentTime);
 }
+
+/*----------------------------------------------------------------------------*/
 
 void flushFifo()
 {
