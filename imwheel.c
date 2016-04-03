@@ -263,8 +263,11 @@ signed char getInput(Display *d, XEvent *e, XModifierKeymap **xmk, signed char k
 				read(fifofd,&stick.y,1);
 			}
 			Printf("getInput: Stick=(%d,%d)\n",stick.x,stick.y);
+            Printf("sensitivity=%d\n",sensitivity);
 			if(sensitivity>0)
 			{ // do thresholded summation then test with sensitivity value
+                Printf("Calculating sensitivity...\n");
+                Printf("stick.y=%d, stick.x=%d, threshhold=%d\n",stick.y,stick.x,threshhold);
 				if(ABS(stick.y)>=threshhold||ABS(stick.x)>=threshhold)
 				{
 					if((stick.x>0 && st_sum_x<0) || (stick.x<0 && st_sum_x>0))
@@ -287,7 +290,7 @@ signed char getInput(Display *d, XEvent *e, XModifierKeymap **xmk, signed char k
 					}
 				}
 			}
-			else // do just threshold testing
+			else // do just thresshold testing
 			{
 /* commented sections here would add time as a factor in the testing
  * preventing events from being generated too fast for apps to react

@@ -80,6 +80,7 @@ struct WinAction *findWA(Display*,int,char*,char*,char*,XModifierKeymap*,char[32
 void doWA(Display*,XButtonEvent*,XModifierKeymap*,char[32],struct WinAction*);
 void modMods(Display*, char*, XModifierKeymap*, Bool, int);
 void flushFifo(void);
+void sensitivXTestFakeKeyEvent(Display* ,unsigned int ,Bool ,unsigned long );
 void closeFifo(void);
 void openFifo(void);
 void KillIMWheel(void);

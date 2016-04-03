@@ -1339,7 +1339,8 @@ void doWA(Display          *d     ,
 				if(wap->out[i][0]!='-')
 				{
 					kc=XKeysymToKeycode(d, XStringToKeysym(wap->out[i]));
-					XTestFakeKeyEvent(d,kc,True,CurrentTime);
+					/*XTestFakeKeyEvent(d,kc,True,CurrentTime);*/
+                    sensitivXTestFakeKeyEvent(d,kc,True,CurrentTime);
 					setbit(nkm,kc,True);
 				}
 				else
@@ -1381,8 +1382,11 @@ void doWA(Display          *d     ,
 					kc=XKeysymToKeycode(d, XStringToKeysym(wap->out[i]));
 					if(getbit(nkm,kc))
 					{
-						XTestFakeKeyEvent(d,kc,False,CurrentTime);
-						setbit(nkm,kc,False);
+                        Printf("Fake key event :%s\n",wap->out[i]);
+						/*XTestFakeKeyEvent(d,kc,False,CurrentTime);*/
+                        sensitivXTestFakeKeyEvent(d,kc,False,CurrentTime);
+                        /*XFlush(d);*/
+                        setbit(nkm,kc,False);
 					}
 				}
 			}
@@ -1394,6 +1398,7 @@ void doWA(Display          *d     ,
 					button=strtoul(wap->out[i]+6,NULL,10);
 					if(button>=256 || getbit(nbm,button))
 					{
+                        Printf("Fake button event :%s\n",wap->out[i]);
 						XTestFakeButtonEvent(d,button,False,CurrentTime);
 						if(button<256)
 							setbit(nbm,button,False);
@@ -1413,6 +1418,7 @@ void doWA(Display          *d     ,
 		}
 		if(!wap->reps) // auto-repeat
 		{
+            Printf("===== Autorepeat\n");
 			if(autodelay)
 				delay(autodelay);
 			if(inputWaiting(d,(XEvent*)e))
@@ -1449,6 +1455,119 @@ void modMods(Display *d, char *km, XModifierKeymap *xmk, Bool on, int delay_time
 }
 
 /*----------------------------------------------------------------------------*/
+
+void sensitivXTestFakeKeyEvent(Display* display,unsigned int keyCode,Bool isPressed,unsigned long delay){
+    static int st_sum=0;
+    static struct timeval firstPressedEventTime={0,0};
+    static Bool key64Clicked=True;
+    static Bool key113Clicked=True;
+    static Bool key114Clicked=True;
+
+    Bool keyUpEvent;
+    struct timeval myntv={0,0},zerotime={0,0};
+    unsigned long dt=0;
+    unsigned long one10sec = 100000;
+
+    keyUpEvent=!isPressed;
+
+    /*printf("=============== keyCode=%d\n",keyCode);*/
+
+    /*if (keyCode!=64 && keyCode!=113 && keyCode!=114 ) {*/
+        /*XTestFakeKeyEvent(display,keyCode,isPressed,delay);*/
+        /*st_sum = 0;*/
+        /*printf("============= SUM RESET 00000000000000000000000 ====== st_sum is 0\n");*/
+        /*return ;*/
+    /*}*/
+    if (sensitivity <= 0) {
+        printf("===== exit with sensitivity=%d \n",sensitivity);
+        /*if (keyUpEvent ){*/
+            /*printf("==================================================================================================== Fired UP event,keyCode=%d\n",keyCode);*/
+        /*}*/
+        /*else {*/
+            /*printf("==================================================================================================== Fired Down event,keyCode=%d\n",keyCode);*/
+        /*}*/
+        XTestFakeKeyEvent(display,keyCode,isPressed,CurrentTime);
+        return ;
+    }
+
+    if (keyUpEvent ){
+        if (keyCode == 64){
+            key64Clicked = True;
+        }
+        if (keyCode == 113){
+            key113Clicked = True;
+        }
+        if (keyCode == 114){
+            key114Clicked = True;
+        }
+    }
+
+
+
+    gettimeofday(&myntv,NULL);
+    if(!firstPressedEventTime.tv_sec)
+        memcpy(&firstPressedEventTime,&myntv,sizeof(struct timeval));
+
+
+    dt=((myntv.tv_sec-firstPressedEventTime.tv_sec)*one10sec*10)+(myntv.tv_usec-firstPressedEventTime.tv_usec);
+
+    /*printf("===== time diff=%lu \n",dt);*/
+    /*printf("===== st_sum=%d, sensitivity=%d\n",st_sum,sensitivity);*/
+    /*printf("===== threshhold=%d\n",threshhold);*/
+    
+    if (dt > threshhold*one10sec && keyUpEvent){
+        if ((key64Clicked && key113Clicked  && key114Clicked)){
+            //  Reset key events count
+            st_sum = 1;
+            memcpy(&firstPressedEventTime,&myntv,sizeof(struct timeval));
+            /*printf("TIME RESET!===========================================TIME RESET! TIME RESET!\n");*/
+        }
+        /*if (keyUpEvent ){*/
+            /*printf("==================================================================================================== Fired UP event,keyCode=%d\n",keyCode);*/
+        /*}*/
+        /*else {*/
+            /*printf("==================================================================================================== Fired Down event,keyCode=%d\n",keyCode);*/
+        /*}*/
+        XTestFakeKeyEvent(display,keyCode,isPressed,CurrentTime);
+        return ;
+    }
+
+    if (!keyUpEvent && keyCode == 64){
+        st_sum +=1;
+    }
+    if(st_sum < sensitivity)
+    {
+        // do  not fire event 
+        /*printf("===== Not fired 2\n");*/
+        return ;
+    }
+
+    if (keyUpEvent ){
+        /*printf("==================================================================================================== Fired UP event,keyCode=%d\n",keyCode);*/
+
+        if ((key64Clicked && key113Clicked) || (key64Clicked && key114Clicked)){
+            //  Clear state to count from very begining
+            st_sum = 0;
+            memcpy(&firstPressedEventTime,&zerotime,sizeof(struct timeval));
+            /*printf("============= SUM RESET 00000000000000000000000 ====== st_sum is 0\n");*/
+        }
+    }
+    else {
+        if (keyCode == 64){
+            key64Clicked = False;
+        }
+        if (keyCode == 113){
+            key113Clicked = False;
+        }
+        if (keyCode == 114){
+            key114Clicked = False;
+        }
+        /*printf("==================================================================================================== Fired Down event,keyCode=%d\n",keyCode);*/
+    }
+
+
+    XTestFakeKeyEvent(display,keyCode,isPressed,CurrentTime);
+}
 
 void flushFifo()
 {
