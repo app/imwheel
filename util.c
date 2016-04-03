@@ -1502,14 +1502,13 @@ void sensitivXTestFakeKeyEvent(Display* display,unsigned int keyCode,Bool isPres
         XTestFakeKeyEvent(display,keyCode,isPressed,CurrentTime);
         return ;
     }
-
+    // Alt_L released
     if (!keyUpEvent && keyCode == 64){
         st_sum +=1;
     }
     if(st_sum < sensitivity)
     {
         // do  not fire event 
-        /*printf("===== Not fired 2\n");*/
         return ;
     }
 
