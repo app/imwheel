@@ -1,0 +1,9 @@
+imwheel
+.deps
+*.o
+Makefile
+stamp-h1
+libjax.a
+config.h
+config.log
+config.status
